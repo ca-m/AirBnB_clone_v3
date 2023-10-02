@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Contains the class DBStorage
+Contains class DBStorage
 """
 
 import models
@@ -21,12 +21,12 @@ classes = {"Amenity": Amenity, "City": City,
 
 
 class DBStorage:
-    """interaacts with the MySQL database"""
+    """interacts with MySQL database"""
     __engine = None
     __session = None
 
     def __init__(self):
-        """Instantiate a DBStorage object"""
+        """Instantiate DBStorage object"""
         HBNB_MYSQL_USER = getenv('HBNB_MYSQL_USER')
         HBNB_MYSQL_PWD = getenv('HBNB_MYSQL_PWD')
         HBNB_MYSQL_HOST = getenv('HBNB_MYSQL_HOST')
@@ -41,7 +41,7 @@ class DBStorage:
             Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
-        """query on the current database session"""
+        """query on current database session"""
         new_dict = {}
         for clss in classes:
             if cls is None or cls is classes[clss] or cls is clss:
@@ -51,41 +51,49 @@ class DBStorage:
                     new_dict[key] = obj
         return (new_dict)
 
-    def new(self, obj):
-        """add the object to the current database session"""
-        self.__session.add(obj)
-
-    def save(self):
-        """commit all changes of the current database session"""
-        self.__session.commit()
-
-    def delete(self, obj=None):
-        """delete from the current database session obj if not None"""
-        if obj is not None:
-            self.__session.delete(obj)
-
-    def reload(self):
-        """reloads data from the database"""
-        Base.metadata.create_all(self.__engine)
-        sess_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
-        Session = scoped_session(sess_factory)
-        self.__session = Session
-
-    def close(self):
-        """call remove() method on the private session attribute"""
-        self.__session.remove()
-
+    def get(self, cls, id):
+		"""
+		Returns obj based on class name and its ID, or
+		None if not found
+		"""
+									    
 	def get(self, cls, id):
-	    '''method to retrieve one object'''
-		if cls and id:
-			tempo = cls, __name__ + "." + id
-			count = self.all(cls)
-			for key in count:
-				if key == tempo:
-					return count[key]
-		else:
-			return None
+		"""retrieves object"""
+		 all_objs = self.all(cls)
+		 for obj in all_objs.values():
+				if obj.id == id:
+						return obj
+		 return None
 
-	def count(self, cls=None):
-		'''class (optional)'''
-		return (len(self.all(cls)))
+	 def count(self, cls=None):
+		"""count number of objects in storage"""
+		if cls:
+			total_count = len(self.all(cls).keys())
+			return total_count
+		else:
+			total_count = len(self.all().keys())
+			return total_count
+
+	def new(self, obj):
+		"""add object to current database session"""
+		self.__session.add(obj)
+
+	def save(self):
+		"""commit all changes of current database session"""
+		self.__session.commit()
+
+	def delete(self, obj=None):
+		"""delete from current database session obj if not None"""
+		if obj is not None:
+			self.__session.delete(obj)
+
+	def reload(self):
+		"""reloads data from database"""
+		Base.metadata.create_all(self.__engine)
+		sess_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
+		Session = scoped_session(sess_factory)
+		elf.__session = Session
+
+	def close(self):
+		"""call remove() method on private session attribute"""
+		self.__session.remove()
